@@ -3,7 +3,6 @@ from pygame import mixer
 import random
 import math
 import warnings
-
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # Initialize the game
@@ -23,6 +22,7 @@ background = pygame.image.load("background.jpg")
 # Background music
 mixer.music.load("background.wav")
 mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.3)
 
 # Player
 playerImg = pygame.image.load("spaceshipImage.png")
@@ -82,9 +82,22 @@ def show_score(x, y):
     screen.blit(score, (x, y))
 
 
+has_played = False
+
+
+def game_over_sound_f():
+    global has_played
+    if not has_played:
+        game_over_sound = mixer.Sound("gameover.wav")
+        game_over_sound.play(1)
+        game_over_sound.set_volume(0.5)
+        has_played = True
+
+
 def game_over_text():
     game_over = font2.render("GAME OVER!", True, (255, 0, 0))
     screen.blit(game_over, (200, 250))
+    game_over_sound_f()
 
 
 def player(x, y):
@@ -162,20 +175,22 @@ while running:
         # If key is pressed check what key it is and do the action
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                playerX_change = -2.3
+                playerX_change = -2.5
             if event.key == pygame.K_RIGHT:
-                playerX_change = +2.3
+                playerX_change = +2.5
             if event.key == pygame.K_UP:
-                playerY_change = -1
+                playerY_change = -2
             if event.key == pygame.K_DOWN:
-                playerY_change = +1
+                playerY_change = +2
             if event.key == pygame.K_SPACE:
                 # Shoot the bullet ONLY when is in state ready
                 if bullet_state == "ready":
                     bullet_sound = mixer.Sound("laser.wav")
                     bullet_sound.play()
+                    bullet_sound.set_volume(0.3)
                     # Get the x coordinate of the spaceship
                     bulletX = playerX
+                    bulletY = playerY
                     fire_bullet(bulletX, bulletY)
 
         if event.type == pygame.KEYUP:
@@ -188,12 +203,7 @@ while running:
     playerX += playerX_change
     playerY += playerY_change
 
-    # Enemy movement and collisions
-
-    # All the enemies are appearing only once while
-    # Enemy4 is appearing twice ;)
-
-    # Game over
+    # Game over (it must be done for each enemy)
     for i in range(1):
         if enemy1Y > 420:
             enemy1Y = 1000
@@ -202,20 +212,20 @@ while running:
             for j in range(num_of_enemies4):
                 enemy4Y[j] = 1000
             game_over_text()
-            game_over_sound = mixer.Sound("gameover.wav")
-            game_over_sound.play(1)
             break
 
+    # Enemy movement and collisions
     enemy1Y += enemy1Y_change  # enemy1 movement
     collision1 = isCollision1(enemy1X, enemy1Y, bulletX, bulletY)
     if collision1:
         explosion_sound = mixer.Sound("explosion.wav")
         explosion_sound.play()
+        explosion_sound.set_volume(0.4)
         bulletY = 490
         bullet_state = "ready"
         score_value += 5
         enemy1X = random.randint(0, 736)
-        enemy1Y = random.randint(-50, 50)
+        enemy1Y = random.randint(-100, 20)
     enemy1(enemy1X, enemy1Y)
 
     for i in range(1):
@@ -235,7 +245,7 @@ while running:
         bullet_state = "ready"
         score_value += 5
         enemy2X = random.randint(0, 736)
-        enemy2Y = random.randint(-50, 50)
+        enemy2Y = random.randint(-100, 20)
     enemy2(enemy2X, enemy2Y)
 
     for i in range(1):
@@ -255,9 +265,10 @@ while running:
         bullet_state = "ready"
         score_value += 5
         enemy3X = random.randint(0, 736)
-        enemy3Y = random.randint(-50, 50)
+        enemy3Y = random.randint(-100, 20)
     enemy3(enemy3X, enemy3Y)
 
+    # All the enemies are appearing only once while
     # Enemy4 is appearing twice! We use a for loop on that
     for i in range(num_of_enemies4):
         if enemy4Y[i] > 420:
@@ -276,7 +287,7 @@ while running:
             bullet_state = "ready"
             score_value += 5
             enemy4X[i] = random.randint(0, 736)
-            enemy4Y[i] = random.randint(-50, 50)
+            enemy4Y[i] = random.randint(-100, 20)
         enemy4(enemy4X[i], enemy4Y[i], i)
 
     # Boundaries
