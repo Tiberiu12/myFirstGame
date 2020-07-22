@@ -3,6 +3,7 @@ from pygame import mixer
 import random
 import math
 import warnings
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # Initialize the game
@@ -87,10 +88,10 @@ has_played = False
 
 def game_over_sound_f():
     global has_played
-    if not has_played:
+    if has_played is False:
         game_over_sound = mixer.Sound("gameover.wav")
-        game_over_sound.play(1)
-        game_over_sound.set_volume(0.5)
+        game_over_sound.play()
+        game_over_sound.set_volume(0.8)
         has_played = True
 
 
@@ -110,7 +111,7 @@ def fire_bullet(x, y):
     screen.blit(bulletImg, (x + 16, y + 20))
 
 
-def isCollision1(enemy1X, enemy1Y, bulletX, bulletY):
+def isbulletCollision1(enemy1X, enemy1Y, bulletX, bulletY):
     distance = math.sqrt(math.pow(enemy1X - bulletX, 2) + math.pow(enemy1Y - bulletY, 2))
     if distance < 28:
         return True
@@ -118,7 +119,7 @@ def isCollision1(enemy1X, enemy1Y, bulletX, bulletY):
         return False
 
 
-def isCollision2(enemy2X, enemy2Y, bulletX, bulletY):
+def isbulletCollision2(enemy2X, enemy2Y, bulletX, bulletY):
     distance = math.sqrt(math.pow(enemy2X - bulletX, 2) + math.pow(enemy2Y - bulletY, 2))
     if distance < 28:
         return True
@@ -126,7 +127,7 @@ def isCollision2(enemy2X, enemy2Y, bulletX, bulletY):
         return False
 
 
-def isCollision3(enemy3X, enemy3Y, bulletX, bulletY):
+def isbulletCollision3(enemy3X, enemy3Y, bulletX, bulletY):
     distance = math.sqrt(math.pow(enemy3X - bulletX, 2) + math.pow(enemy3Y - bulletY, 2))
     if distance < 28:
         return True
@@ -134,9 +135,41 @@ def isCollision3(enemy3X, enemy3Y, bulletX, bulletY):
         return False
 
 
-def isCollision4(enemy4X, enemy4Y, bulletX, bulletY):
+def isbulletCollision4(enemy4X, enemy4Y, bulletX, bulletY):
     distance = math.sqrt(math.pow(enemy4X - bulletX, 2) + math.pow(enemy4Y - bulletY, 2))
     if distance < 28:
+        return True
+    else:
+        return False
+
+
+def isplayerCollision1(enemy1X, enemy1Y, playerX, playerY):
+    distance = math.sqrt(math.pow(enemy1X - playerX, 2) + math.pow(enemy1Y - playerY, 2))
+    if distance < 50:
+        return True
+    else:
+        return False
+
+
+def isplayerCollision2(enemy2X, enemy2Y, playerX, playerY):
+    distance = math.sqrt(math.pow(enemy2X - playerX, 2) + math.pow(enemy2Y - playerY, 2))
+    if distance < 50:
+        return True
+    else:
+        return False
+
+
+def isplayerCollision3(enemy3X, enemy3Y, playerX, playerY):
+    distance = math.sqrt(math.pow(enemy3X - playerX, 2) + math.pow(enemy3Y - playerY, 2))
+    if distance < 50:
+        return True
+    else:
+        return False
+
+
+def isplayerCollision4(enemy4X, enemy4Y, playerX, playerY):
+    distance = math.sqrt(math.pow(enemy4X[i] - playerX, 2) + math.pow(enemy4Y[i] - playerY, 2))
+    if distance < 50:
         return True
     else:
         return False
@@ -203,7 +236,7 @@ while running:
     playerX += playerX_change
     playerY += playerY_change
 
-    # Game over (it must be done for each enemy)
+    # Game over for enemy1 (it must be done for each enemy)
     for i in range(1):
         if enemy1Y > 420:
             enemy1Y = 1000
@@ -212,12 +245,24 @@ while running:
             for j in range(num_of_enemies4):
                 enemy4Y[j] = 1000
             game_over_text()
-            break
+            pygame.mixer.music.set_volume(0)
 
     # Enemy movement and collisions
     enemy1Y += enemy1Y_change  # enemy1 movement
-    collision1 = isCollision1(enemy1X, enemy1Y, bulletX, bulletY)
-    if collision1:
+
+    player_collision1 = isplayerCollision1(enemy1X, enemy1Y, playerX, playerY)
+    if player_collision1:
+        enemy1Y = 1000
+        enemy2Y = 1000
+        enemy3Y = 1000
+        for j in range(num_of_enemies4):
+            enemy4Y[j] = 1000
+        playerX = 368
+        playerY = 490
+        game_over_text()
+
+    bullet_collision1 = isbulletCollision1(enemy1X, enemy1Y, bulletX, bulletY)
+    if bullet_collision1:
         explosion_sound = mixer.Sound("explosion.wav")
         explosion_sound.play()
         explosion_sound.set_volume(0.4)
@@ -228,6 +273,7 @@ while running:
         enemy1Y = random.randint(-100, 20)
     enemy1(enemy1X, enemy1Y)
 
+    # Game over for enemy2
     for i in range(1):
         if enemy2Y > 420:
             enemy1Y = 1000
@@ -236,11 +282,22 @@ while running:
             for j in range(num_of_enemies4):
                 enemy4Y[j] = 1000
             game_over_text()
-            break
 
     enemy2Y += enemy2Y_change  # enemy2 movement
-    collision2 = isCollision2(enemy2X, enemy2Y, bulletX, bulletY)
-    if collision2:
+
+    player_collision2 = isplayerCollision2(enemy2X, enemy2Y, playerX, playerY)
+    if player_collision2:
+        enemy1Y = 1000
+        enemy2Y = 1000
+        enemy3Y = 1000
+        for j in range(num_of_enemies4):
+            enemy4Y[j] = 1000
+        playerX = 368
+        playerY = 490
+        game_over_text()
+
+    bullet_collision2 = isbulletCollision2(enemy2X, enemy2Y, bulletX, bulletY)
+    if bullet_collision2:
         bulletY = 490
         bullet_state = "ready"
         score_value += 5
@@ -248,6 +305,7 @@ while running:
         enemy2Y = random.randint(-100, 20)
     enemy2(enemy2X, enemy2Y)
 
+    # Game over for enemy3
     for i in range(1):
         if enemy3Y > 420:
             enemy1Y = 1000
@@ -256,11 +314,22 @@ while running:
             for j in range(num_of_enemies4):
                 enemy4Y[j] = 1000
             game_over_text()
-            break
 
     enemy3Y += enemy3Y_change  # enemy3 movement
-    collision3 = isCollision3(enemy3X, enemy3Y, bulletX, bulletY)
-    if collision3:
+
+    player_collision3 = isplayerCollision3(enemy3X, enemy3Y, playerX, playerY)
+    if player_collision3:
+        enemy1Y = 1000
+        enemy2Y = 1000
+        enemy3Y = 1000
+        for j in range(num_of_enemies4):
+            enemy4Y[j] = 1000
+        playerX = 368
+        playerY = 490
+        game_over_text()
+
+    bullet_collision3 = isbulletCollision3(enemy3X, enemy3Y, bulletX, bulletY)
+    if bullet_collision3:
         bulletY = 490
         bullet_state = "ready"
         score_value += 5
@@ -271,6 +340,7 @@ while running:
     # All the enemies are appearing only once while
     # Enemy4 is appearing twice! We use a for loop on that
     for i in range(num_of_enemies4):
+        # Game over for enemy4
         if enemy4Y[i] > 420:
             enemy1Y = 1000
             enemy2Y = 1000
@@ -278,11 +348,22 @@ while running:
             for j in range(num_of_enemies4):
                 enemy4Y[j] = 1000
             game_over_text()
-            break
 
         enemy4Y[i] += enemy4Y_change[i]  # enemy4 movement
-        collision4 = isCollision4(enemy4X[i], enemy4Y[i], bulletX, bulletY)
-        if collision4:
+
+        player_collision4 = isplayerCollision4(enemy4X, enemy4Y, playerX, playerY)
+        if player_collision4:
+            enemy1Y = 1000
+            enemy2Y = 1000
+            enemy3Y = 1000
+            for j in range(num_of_enemies4):
+                enemy4Y[j] = 1000
+            playerX = 368
+            playerY = 490
+            game_over_text()
+
+        bullet_collision4 = isbulletCollision4(enemy4X[i], enemy4Y[i], bulletX, bulletY)
+        if bullet_collision4:
             bulletY = 490
             bullet_state = "ready"
             score_value += 5
